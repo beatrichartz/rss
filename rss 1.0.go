@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"log"
 )
 
 func parseRSS1(data []byte, read *db) (*Feed, error) {
@@ -15,6 +16,8 @@ func parseRSS1(data []byte, read *db) (*Feed, error) {
 	p.CharsetReader = charsetReader
 	err := p.Decode(&feed)
 	if err != nil {
+		log.Println("ERROR")
+		log.Println(string(data))
 		return nil, err
 	}
 	if feed.Channel == nil {
@@ -80,6 +83,10 @@ func parseRSS1(data []byte, read *db) (*Feed, error) {
 
 		next := new(Item)
 		next.Title = item.Title
+		next.Author = item.Author
+		if next.Author == "" {
+			next.Author = item.Creator
+		}
 		next.Content = item.Content
 		next.Link = item.Link
 		if item.Date != "" {
@@ -129,6 +136,8 @@ type rss1_0Channel struct {
 type rss1_0Item struct {
 	XMLName xml.Name `xml:"item"`
 	Title   string   `xml:"title"`
+	Author  string   `xml:"author"`
+	Creator string   `xml:"creator"`
 	Content string   `xml:"description"`
 	Link    string   `xml:"link"`
 	PubDate string   `xml:"pubDate"`

@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"time"
+	"log"
 )
 
 func parseAtom(data []byte, read *db) (*Feed, error) {
@@ -13,6 +14,8 @@ func parseAtom(data []byte, read *db) (*Feed, error) {
 	p.CharsetReader = charsetReader
 	err := p.Decode(&feed)
 	if err != nil {
+		log.Println("ERROR")
+		log.Println(string(data))
 		return nil, err
 	}
 
@@ -40,6 +43,10 @@ func parseAtom(data []byte, read *db) (*Feed, error) {
 
 		next := new(Item)
 		next.Title = item.Title
+		next.Author = item.Author
+		if next.Author == "" {
+			next.Author = item.Creator
+		}
 		next.Content = item.Content
 		next.Link = item.Link.Href
 		if item.Date != "" {
@@ -82,6 +89,8 @@ type atomFeed struct {
 type atomItem struct {
 	XMLName xml.Name `xml:"entry"`
 	Title   string   `xml:"title"`
+	Author  string   `xml:"author"`
+	Creator string   `xml:"author"`
 	Content string   `xml:"summary"`
 	Link    atomLink `xml:"link"`
 	Date    string   `xml:"updated"`
